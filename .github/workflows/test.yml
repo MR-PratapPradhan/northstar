@@ -5,7 +5,7 @@ on:
     branches: [dev, stage, prod]
     paths:
       - 'apps/**'
-      - 'tests/**'
+      - 'infra/**'
 
 jobs:
   test:
