@@ -1,4 +1,3 @@
-# Example: .github/workflows/build.yml
 name: Build
 
 on:
@@ -11,8 +10,44 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - name: Build step
-        run: echo "Building app..."
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r apps/retail-api/requirements.txt
+
+      - name: Build Docker image
+        run: docker build -t apps/retail-api:latest apps/retail-api
+
+      - name: Install Syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Generate SBOM
+        run: syft apps/retail-api -o json > sbom.json
+
+      - name: Install Cosign
+        run: |
+          curl -sSfL https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64 -o cosign
+          chmod +x cosign
+          sudo mv cosign /usr/local/bin/
+
+      - name: Sign Docker image
+        env:
+          COSIGN_KEY: ${{ secrets.COSIGN_KEY }}
+        run: cosign sign --key env://COSIGN_KEY apps/retail-api:latest
+
+      - name: Publish build metadata
+        run: |
+          echo "Git SHA: ${{ github.sha }}"
+          echo "SBOM hash: $(sha256sum sbom.json)"
+          cosign verify apps/retail-api:latest > cosign_bundle.txt
+          echo "Cosign bundle: $(cat cosign_bundle.txt)"
 
