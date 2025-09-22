@@ -25,6 +25,23 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/<ROLE_NAME>
           aws-region: ap-south-1
+     
+      - name: Check AWS Budget Status
+        run: |
+          echo "Checking AWS Budget for environment: ${{ github.ref_name }}"
+          BUDGET_NAME="${{ github.ref_name }}-budget"
+          ACCOUNT_ID="<YOUR_AWS_ACCOUNT_ID>"
+
+          status=$(aws budgets describe-budget-performance \
+            --account-id $ACCOUNT_ID \
+            --budget-name $BUDGET_NAME \
+            | jq -r '.BudgetPerformance.Status')
+
+          echo "Budget status: $status"
+          if [[ "$status" == "ALARM" ]]; then
+            echo "❌ Budget threshold exceeded for $BUDGET_NAME. Halting deployment."
+            exit 1
+          fi
 
       - name: Deploy with Terragrunt
         run: |
