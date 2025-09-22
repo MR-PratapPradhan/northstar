@@ -19,7 +19,7 @@ inputs = {
   environment         = "prod"
   service_name        = "retail-api"
   image_tag           = "stable"
-  desired_count       = 3
+  desired_count       = 1
   deployment_strategy = "blue-green"
 }
 
