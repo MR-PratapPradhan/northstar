@@ -1,0 +1,31 @@
+name: Scan
+
+on:
+  pull_request:
+    branches: [dev, stage, prod]
+    paths:
+      - 'apps/**'
+      - 'infra/**'
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Scan dependencies for CVEs
+        run: grype apps/retail-api
+
+      - name: Scan Docker image
+        run: |
+          docker build -t retail-api apps/retail-api
+          trivy image retail-api
+
+      - name: Scan Terraform modules
+        run: |
+          checkov -d infra/terraform
+          tfsec infra/terraform
+
+      - name: Validate Terragrunt inputs
+        run: conftest test --policy opa-policies/ infra/terragrunt
+

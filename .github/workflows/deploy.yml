@@ -1,8 +1,17 @@
-# .github/workflows/deploy.yml
+name: Deploy
+
+on:
+  push:
+    branches: [dev, stage, prod]
+    paths:
+      - 'apps/**'
+      - 'infra/**'
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: prod
+    environment:
+      name: ${{ github.ref_name }} # Automatically sets environment to dev/stage/prod
     permissions:
       id-token: write
       contents: read
@@ -16,4 +25,14 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/<ROLE_NAME>
           aws-region: ap-south-1
+
+      - name: Deploy with Terragrunt
+        run: |
+          terragrunt apply --terragrunt-working-dir infra/terragrunt/${{ github.ref_name }}
+
+      - name: Publish deployment metadata
+        run: |
+          echo "Git SHA: ${{ github.sha }}"
+          echo "SBOM hash: $(sha256sum sbom.json)"
+          echo "Cosign bundle: $(cosign verify apps/retail-api:latest)"
 

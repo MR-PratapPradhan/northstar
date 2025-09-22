@@ -1,0 +1,29 @@
+name: Test
+
+on:
+  pull_request:
+    branches: [dev, stage, prod]
+    paths:
+      - 'apps/**'
+      - 'tests/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r apps/retail-api/requirements.txt
+
+      - name: Run unit tests
+        run: pytest tests/ --cov=apps/retail-api --cov-fail-under=90
+
+      - name: Run integration tests
+        run: docker-compose -f tests/docker-compose.yml up --abort-on-container-exit
+
