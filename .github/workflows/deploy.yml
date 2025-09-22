@@ -30,9 +30,21 @@ jobs:
         run: |
           terragrunt apply --terragrunt-working-dir infra/terragrunt/${{ github.ref_name }}
 
-      - name: Publish deployment metadata
+      - name: Capture metadata
         run: |
-          echo "Git SHA: ${{ github.sha }}"
-          echo "SBOM hash: $(sha256sum sbom.json)"
-          echo "Cosign bundle: $(cosign verify apps/retail-api:latest)"
+          echo "Git SHA: ${{ github.sha }}" > metadata.txt
+          echo "SBOM hash: $(sha256sum sbom.json | awk '{print $1}')" >> metadata.txt
+          cosign verify apps/retail-api:latest > cosign_bundle.txt
+          echo "Cosign bundle: $(cat cosign_bundle.txt | sha256sum | awk '{print $1}')" >> metadata.txt
+
+      - name: Push metadata to CloudWatch Logs
+        run: |
+          aws logs create-log-group --log-group-name /deployments/retail-api || true
+          aws logs create-log-stream --log-group-name /deployments/retail-api --log-stream-name ${{ github.sha }} || true
+          TIMESTAMP=$(date +%s%3N)
+          aws logs put-log-events \
+            --log-group-name /deployments/retail-api \
+            --log-stream-name ${{ github.sha }} \
+            --log-events timestamp=$TIMESTAMP,message="$(cat metadata.txt)"
+
 
