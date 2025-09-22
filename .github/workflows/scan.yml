@@ -1,7 +1,7 @@
 name: Scan
 
 on:
-  pull_request:
+  push:
     branches: [dev, stage, prod]
     paths:
       - 'apps/**'
