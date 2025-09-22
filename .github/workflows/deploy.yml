@@ -9,6 +9,12 @@ on:
       - 'apps/**'
       - 'infra/**'
 
+on:
+  workflow_run:
+    workflows: ["Scan"]
+    types:
+      - completed      
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
