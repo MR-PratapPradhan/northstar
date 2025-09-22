@@ -10,8 +10,24 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    services:
+      localstack:
+        image: localstack/localstack:latest
+        ports:
+          - 4566:4566
+        env:
+          SERVICES: s3,dynamodb
+          DEBUG: 1
+        options: >-
+          --health-cmd "curl -f http://localhost:4566/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -21,9 +37,12 @@ jobs:
       - name: Install dependencies
         run: pip install -r apps/retail-api/requirements.txt
 
-      - name: Run unit tests
-        run: pytest tests/ --cov=apps/retail-api --cov-fail-under=90
+      - name: Run unit tests with coverage
+        run: pytest --cov=apps/retail-api --cov-fail-under=90
 
-      - name: Run integration tests
+      - name: Run contract tests with Pact
+        run: pact-verifier verify --provider-base-url=http://localhost:8000
+
+      - name: Run integration tests with Docker Compose
         run: docker-compose -f tests/docker-compose.yml up --abort-on-container-exit
 
