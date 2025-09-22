@@ -10,22 +10,55 @@ on:
 jobs:
   scan:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
 
-      - name: Scan dependencies for CVEs
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Grype for CVE scanning of app dependencies
+      - name: Install Grype
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Scan app dependencies with Grype
         run: grype apps/retail-api
 
-      - name: Scan Docker image
+      # Trivy for Docker image scanning
+      - name: Install Trivy
         run: |
-          docker build -t retail-api apps/retail-api
-          trivy image retail-api
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.1_Linux-64bit.deb
+          sudo dpkg -i trivy_0.50.1_Linux-64bit.deb
 
-      - name: Scan Terraform modules
+      - name: Build Docker image
+        run: docker build -t retail-api apps/retail-api
+
+      - name: Scan Docker image with Trivy
+        run: trivy image retail-api --exit-code 1 --severity CRITICAL,HIGH
+
+      # Checkov and tfsec for Terraform misconfigurations
+      - name: Install Checkov
+        run: pip install checkov
+
+      - name: Run Checkov on Terraform
+        run: checkov -d infra/terraform --soft-fail
+
+      - name: Install tfsec
         run: |
-          checkov -d infra/terraform
-          tfsec infra/terraform
+          curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
 
-      - name: Validate Terragrunt inputs
-        run: conftest test --policy opa-policies/ infra/terragrunt
+      - name: Run tfsec on Terraform
+        run: tfsec infra/terraform
+
+      # Conftest + OPA for Terragrunt policy validation
+      - name: Install Conftest
+        run: |
+          wget https://github.com/open-policy-agent/conftest/releases/latest/download/conftest_0.41.0_Linux_x86_64.tar.gz
+          tar xzf conftest_0.41.0_Linux_x86_64.tar.gz
+          sudo mv conftest /usr/local/bin/
+
+      - name: Validate Terragrunt inputs with OPA policies
+        run: conftest test infra/terragrunt --policy opa-policies/
+
 
