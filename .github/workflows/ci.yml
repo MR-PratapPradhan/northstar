@@ -1,0 +1,19 @@
+on:
+  pull_request:
+    paths:
+      - 'apps/**'
+      - 'infra/**'
+
+jobs:
+  build:
+    uses: ./.github/actions/build
+    with:
+      image_name: retail-api
+      path: apps/retail-api
+
+  test:
+    uses: ./.github/actions/test
+
+  scan:
+    uses: ./.github/actions/scan
+
