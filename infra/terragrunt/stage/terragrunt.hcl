@@ -19,7 +19,7 @@ inputs = {
   environment         = "stage"
   service_name        = "retail-api"
   image_tag           = "staging"
-  desired_count       = 2
+  desired_count       = 1
   deployment_strategy = "rolling"
 }
 
