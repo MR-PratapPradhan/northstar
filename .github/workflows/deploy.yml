@@ -2,17 +2,26 @@ name: Deploy
 
 on:
   push:
-    branches: [dev, stage, prod]
+    branches:
+      - dev
+      - stage
+      - prod
+
   pull_request:
-    branches: [dev, stage, prod]
+    branches:
+      - dev
+      - stage
+      - prod
     paths:
       - 'apps/**'
       - 'infra/**'
 
   workflow_run:
-    workflows: ["Scan"]
+    workflows:
+      - Scan
     types:
-      - completed      
+      - completed
+
 
 jobs:
   deploy:

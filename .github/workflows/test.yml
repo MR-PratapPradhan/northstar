@@ -2,17 +2,27 @@ name: Test
 
 on:
   push:
-    branches: [dev, stage, prod]
+    branches:
+      - dev
+      - stage
+      - prod
+
   pull_request:
-    branches: [dev, stage, prod]
+    branches:
+      - dev
+      - stage
+      - prod
     paths:
       - 'apps/**'
       - 'infra/**'
 
   workflow_run:
-    workflows: ["Build"]
+    workflows:
+      - Build
     types:
-      - completed      
+      - completed
+
+
 
 jobs:
   test:
