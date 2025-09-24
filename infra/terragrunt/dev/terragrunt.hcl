@@ -19,7 +19,7 @@ inputs = {
   environment         = "dev"
   service_name        = "retail-api"
   image_tag           = "latest"
-  desired_count       = 3
+  desired_count       = 4444 
   deployment_strategy = "rolling"
 }
 
