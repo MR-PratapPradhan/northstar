@@ -53,8 +53,8 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r apps/retail-api/requirements.txt
-   
-      - name: Install dependencies  
+
+      - name: Install test tools
         run: pip install pytest-cov
 
       - name: Run unit tests with coverage
