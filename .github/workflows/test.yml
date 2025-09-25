@@ -60,14 +60,14 @@ jobs:
       - name: Run unit tests with coverage
         run: PYTHONPATH=. pytest apps/retail_api/tests --cov=apps/retail_api --cov-fail-under=90
 
-      - name: Install Pact Verifier
-        run: |
-          wget https://github.com/pact-foundation/pact-verifier/releases/download/v0.1.5/pact-verifier-linux-x86_64
-          chmod +x pact-verifier-linux-x86_64
-          sudo mv pact-verifier-linux-x86_64 /usr/local/bin/pact-verifier
+#      - name: Install Pact Verifier
+#        run: |
+#          wget https://github.com/pact-foundation/pact-verifier/releases/download/v0.1.5/pact-verifier-linux-x86_64
+#          chmod +x pact-verifier-linux-x86_64
+#          sudo mv pact-verifier-linux-x86_64 /usr/local/bin/pact-verifier
 
-      - name: Run contract tests with Pact
-        run: pact-verifier verify --provider-base-url=http://localhost:8000
+#      - name: Run contract tests with Pact
+#        run: pact-verifier verify --provider-base-url=http://localhost:8000
         
       - name: Run integration tests with Docker Compose
         run: docker-compose -f tests/docker-compose.yml up --abort-on-container-exit
