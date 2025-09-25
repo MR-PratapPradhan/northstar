@@ -36,7 +36,7 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
 
       - name: Scan app dependencies with Grype
-        run: grype apps/retail-api
+        run: grype apps/retail_api
 
 #      # Trivy for Docker image scanning
 #      - name: Install Trivy

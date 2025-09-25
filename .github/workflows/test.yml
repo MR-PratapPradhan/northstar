@@ -52,13 +52,13 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
-        run: pip install -r apps/retail-api/requirements.txt
+        run: pip install -r apps/retail_api/requirements.txt
 
       - name: Install test tools
         run: pip install pytest-cov
 
       - name: Run unit tests with coverage
-        run: PYTHONPATH=. pytest apps/retail-api/tests --cov=apps/retail-api --cov-fail-under=90
+        run: PYTHONPATH=. pytest apps/retail_api/tests --cov=apps/retail_api --cov-fail-under=90
 
       - name: Run contract tests with Pact
         run: pact-verifier verify --provider-base-url=http://localhost:8000
