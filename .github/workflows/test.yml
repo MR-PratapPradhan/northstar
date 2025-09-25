@@ -62,9 +62,9 @@ jobs:
 
       - name: Install Pact Verifier
         run: |
-          wget https://github.com/pact-foundation/pact-verifier/releases/download/v0.1.5/pact-verifier-linux-amd64
-          chmod +x pact-verifier-linux-amd64
-          sudo mv pact-verifier-linux-amd64 /usr/local/bin/pact-verifier
+          wget https://github.com/pact-foundation/pact-verifier/releases/download/v0.1.5/pact-verifier-linux-x86_64
+          chmod +x pact-verifier-linux-x86_64
+          sudo mv pact-verifier-linux-x86_64 /usr/local/bin/pact-verifier
 
       - name: Run contract tests with Pact
         run: pact-verifier verify --provider-base-url=http://localhost:8000
