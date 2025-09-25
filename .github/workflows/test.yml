@@ -62,7 +62,7 @@ jobs:
 
       - name: Install Pact Verifier
         run: |
-          wget https://github.com/pact-foundation/pact-verifier/releases/latest/download/pact-verifier-linux-amd64
+          wget https://github.com/pact-foundation/pact-verifier/releases/download/v0.1.5/pact-verifier-linux-amd64
           chmod +x pact-verifier-linux-amd64
           sudo mv pact-verifier-linux-amd64 /usr/local/bin/pact-verifier
 
