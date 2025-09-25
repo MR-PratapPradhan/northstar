@@ -74,8 +74,8 @@ jobs:
         run: |
           curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
 
-      - name: Run tfsec on Terraform
-        run: tfsec infra/terraform
+      - name: Run tfsec on Terragrunt
+        run: tfsec infra/terragrunt/dev
 
       # Conftest + OPA for Terragrunt policy validation
       - name: Install Conftest
