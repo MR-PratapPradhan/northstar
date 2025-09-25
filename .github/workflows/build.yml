@@ -26,7 +26,7 @@ jobs:
         run: pip install -r apps/retail_api/requirements.txt
 
       - name: Build Docker image
-        run: docker build -t apps/retail_pi:latest apps/retail-api
+        run: docker build -t apps/retail_pi:latest apps/retail_api
 
       - name: Install Syft
         run: |
@@ -66,5 +66,5 @@ jobs:
 #      - name: Tag and Push Docker image to ECR
 #        run: |
 #          docker tag apps/retail_api:latest ${{ secrets.ECR_REGISTRY }}/apps/retail_api:latest
-#          docker push ${{ secrets.ECR_REGISTRY }}/apps/retail-api:latest
+#          docker push ${{ secrets.ECR_REGISTRY }}/apps/retail_api:latest
 
