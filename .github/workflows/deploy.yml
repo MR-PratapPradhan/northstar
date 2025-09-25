@@ -2,10 +2,26 @@ name: Deploy
 
 on:
   push:
-    branches: [dev, stage, prod]
+    branches:
+      - dev
+      - stage
+      - prod
+
+  pull_request:
+    branches:
+      - dev
+      - stage
+      - prod
     paths:
       - 'apps/**'
       - 'infra/**'
+
+  workflow_run:
+    workflows:
+      - Scan
+    types:
+      - completed
+
 
 jobs:
   deploy:
@@ -51,7 +67,7 @@ jobs:
         run: |
           echo "Git SHA: ${{ github.sha }}" > metadata.txt
           echo "SBOM hash: $(sha256sum sbom.json | awk '{print $1}')" >> metadata.txt
-          cosign verify apps/retail-api:latest > cosign_bundle.txt
+          cosign verify apps/retail_-api:latest > cosign_bundle.txt
           echo "Cosign bundle: $(cat cosign_bundle.txt | sha256sum | awk '{print $1}')" >> metadata.txt
 
       - name: Push metadata to CloudWatch Logs

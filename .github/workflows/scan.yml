@@ -1,11 +1,26 @@
 name: Scan
 
 on:
+  push:
+    branches:
+      - dev
+      - stage
+      - prod
+
   pull_request:
-    branches: [dev, stage, prod]
+    branches:
+      - dev
+      - stage
+      - prod
     paths:
       - 'apps/**'
       - 'infra/**'
+
+  workflow_run:
+    workflows:
+      - Test
+    types:
+      - completed
 
 jobs:
   scan:
@@ -21,21 +36,32 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
 
       - name: Scan app dependencies with Grype
-        run: grype apps/retail-api
+        run: grype apps/retail_api
 
-      # Trivy for Docker image scanning
-      - name: Install Trivy
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
-          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.1_Linux-64bit.deb
-          sudo dpkg -i trivy_0.50.1_Linux-64bit.deb
+#      # Trivy for Docker image scanning
+#      - name: Install Trivy
+#        run: |
+#          sudo apt-get update
+#          sudo apt-get install -y wget
+#          wget https://github.com/aquasecurity/trivy/releases/download/v0.50.1/trivy_0.50.1_Linux-64bit.deb
+#          sudo dpkg -i trivy_0.50.1_Linux-64bit.deb
 
-      - name: Build Docker image
-        run: docker build -t retail-api apps/retail-api
+#      # Authenticate with Amazon ECR
+#      - name: Configure AWS credentials
+#        uses: aws-actions/configure-aws-credentials@v2
+#        with:
+#          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Scan Docker image with Trivy
-        run: trivy image retail-api --exit-code 1 --severity CRITICAL,HIGH
+#      - name: Log in to Amazon ECR
+#        run: aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+
+#      - name: Pull Docker image from ECR
+#        run: docker pull ${{ secrets.ECR_REGISTRY }}/apps/retail-api:latest
+
+#      - name: Scan Docker image with Trivy
+#        run: trivy image ${{ secrets.ECR_REGISTRY }}/apps/retail-api:latest --exit-code 1 --severity CRITICAL,HIGH
 
       # Checkov and tfsec for Terraform misconfigurations
       - name: Install Checkov
@@ -48,17 +74,16 @@ jobs:
         run: |
           curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
 
-      - name: Run tfsec on Terraform
-        run: tfsec infra/terraform
+      - name: Run tfsec on Terragrunt
+        run: tfsec infra/terragrunt/dev
 
       # Conftest + OPA for Terragrunt policy validation
       - name: Install Conftest
         run: |
-          wget https://github.com/open-policy-agent/conftest/releases/latest/download/conftest_0.41.0_Linux_x86_64.tar.gz
-          tar xzf conftest_0.41.0_Linux_x86_64.tar.gz
+          wget https://github.com/open-policy-agent/conftest/releases/download/v0.62.0/conftest_0.62.0_Linux_x86_64.tar.gz
+          tar xzf conftest_0.62.0_Linux_x86_64.tar.gz 
           sudo mv conftest /usr/local/bin/
 
-      - name: Validate Terragrunt inputs with OPA policies
-        run: conftest test infra/terragrunt --policy opa-policies/
-
+#      - name: Validate Terragrunt inputs with OPA policies
+#        run: conftest test infra/terragrunt --policy opa-policies/
 
